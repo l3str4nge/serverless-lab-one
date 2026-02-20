@@ -4,6 +4,7 @@ import Hero from './components/Hero'
 import About from './components/About'
 import Resume from './components/Resume'
 import Projects from './components/Projects'
+import Paintings from './components/Paintings'
 import Contact from './components/Contact'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <About />
         <Projects />
         <Resume />
+        <Paintings />
         <Contact />
       </main>
     </ThemeProvider>

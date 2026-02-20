@@ -8,7 +8,11 @@ function About() {
         from crafting clean UIs to designing cloud infrastructure.
       </p>
       <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
-        Outside of work, I'm a father of two. I enjoy swimming and painting on canvas.
+        Outside of work, I'm a father of two. I enjoy swimming and painting on canvas —{' '}
+        <a href="#paintings" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+          see my work
+        </a>
+        .
       </p>
     </section>
   )
