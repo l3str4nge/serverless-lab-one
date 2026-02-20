@@ -12,7 +12,7 @@ function Hero() {
       </p>
       <div className="flex gap-4">
         <a
-          href="#resume"
+          href="#projects"
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
         >
           View my work
