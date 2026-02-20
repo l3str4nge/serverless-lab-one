@@ -1,9 +1,16 @@
 const projects = [
   {
+    name: 'serverless-lab-one',
+    description:
+      'A personal portfolio and sandbox for learning and experimenting with serverless architecture on AWS. Built with React and hosted on S3 + CloudFront — this very page is part of the project.',
+    tags: ['React', 'TypeScript', 'AWS', 'S3', 'CloudFront', 'Serverless'],
+    url: 'https://github.com/l3str4nge/serverless-lab-one',
+  },
+  {
     name: 'kidnoti',
     description:
       'A serverless application that scrapes the daily meal menu from a kindergarten website, extracts and analyzes menu images using AWS Bedrock, and delivers a concise summary via text message — so you always know what\'s on the plate today.',
-    tags: ['Python', 'AWS', 'Serverless', 'Bedrock', 'Web Scraping'],
+    tags: ['Python', 'AWS', 'Serverless', 'Bedrock', 'SNS', 'Web Scraping'],
     url: null,
   },
 ]
