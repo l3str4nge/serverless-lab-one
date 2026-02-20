@@ -20,6 +20,14 @@ function Contact() {
         >
           GitHub
         </a>
+        <a
+          href="https://www.linkedin.com/in/mateusz-zawadzki"
+          target="_blank"
+          rel="noreferrer"
+          className="border border-gray-300 dark:border-gray-600 hover:border-gray-500 dark:hover:border-gray-400 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-semibold px-6 py-3 rounded-lg transition-colors text-center"
+        >
+          LinkedIn
+        </a>
       </div>
     </section>
   )
