@@ -8,8 +8,7 @@ function About() {
         from crafting clean UIs to designing cloud infrastructure.
       </p>
       <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
-        When I'm not coding, I'm exploring new technologies and pushing the
-        limits of what's possible without managing a single server.
+        Outside of work, I'm a father of two. I enjoy swimming and painting on canvas.
       </p>
     </section>
   )
