@@ -2,8 +2,8 @@ const projects = [
   {
     name: 'serverless-lab-one',
     description:
-      'A personal portfolio and sandbox for learning and experimenting with serverless architecture on AWS. Built with React and hosted on S3 + CloudFront — this very page is part of the project.',
-    tags: ['React', 'TypeScript', 'AWS', 'S3', 'CloudFront', 'Serverless'],
+      'A personal portfolio and sandbox for learning and experimenting with serverless architecture on AWS. Built with React and hosted on S3 + CloudFront, with infrastructure provisioned using Terraform — this very page is part of the project.',
+    tags: ['React', 'TypeScript', 'AWS', 'S3', 'CloudFront', 'Serverless', 'Terraform'],
     url: 'https://github.com/l3str4nge/serverless-lab-one',
   },
   {
