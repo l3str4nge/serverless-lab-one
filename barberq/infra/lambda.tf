@@ -30,6 +30,7 @@ resource "aws_iam_role_policy" "lambda_cognito" {
       Action = ["cognito-idp:SignUp", "cognito-idp:InitiateAuth"]
       Resource = [
         aws_cognito_user_pool.clients.arn,
+        aws_cognito_user_pool.business.arn,
       ]
     }]
   })
@@ -55,6 +56,53 @@ resource "aws_lambda_function" "register_client" {
   environment {
     variables = {
       APP_CLIENT_ID = aws_cognito_user_pool_client.clients_app.id
+    }
+  }
+}
+
+# --- Business registration Lambda ---
+
+data "archive_file" "register_business" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/auth/register_business.py"
+  output_path = "${path.module}/../lambdas/auth/register_business.zip"
+}
+
+resource "aws_lambda_function" "register_business" {
+  function_name    = "barberq-register-business"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "register_business.handler"
+  filename         = data.archive_file.register_business.output_path
+  source_code_hash = data.archive_file.register_business.output_base64sha256
+
+  environment {
+    variables = {
+      APP_CLIENT_ID = aws_cognito_user_pool_client.business_app.id
+    }
+  }
+}
+
+# --- Business login Lambda ---
+
+data "archive_file" "login_business" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/auth/login_business.py"
+  output_path = "${path.module}/../lambdas/auth/login_business.zip"
+}
+
+resource "aws_lambda_function" "login_business" {
+  function_name    = "barberq-login-business"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "login_business.handler"
+  filename         = data.archive_file.login_business.output_path
+  source_code_hash = data.archive_file.login_business.output_base64sha256
+
+  environment {
+    variables = {
+      APP_CLIENT_ID  = aws_cognito_user_pool_client.business_app.id
+      ALLOWED_ORIGIN = var.allowed_origin
     }
   }
 }

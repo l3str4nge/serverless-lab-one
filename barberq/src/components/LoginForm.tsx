@@ -27,12 +27,9 @@ function LoginForm({ type }: LoginFormProps) {
     setLoading(true)
 
     try {
-      if (!isClient) {
-        setError('Business login is not available yet.')
-        return
-      }
+      const url = isClient ? '/api/auth/login' : '/api/auth/business/login'
 
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -47,7 +44,7 @@ function LoginForm({ type }: LoginFormProps) {
       }
 
       login(data.accessToken)
-      navigate('/barberq/barbers')
+      navigate(isClient ? '/barberq/barbers' : '/barberq/dashboard/business')
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

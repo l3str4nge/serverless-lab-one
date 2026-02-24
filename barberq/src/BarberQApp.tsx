@@ -5,6 +5,7 @@ import BusinessLogin from './pages/BusinessLogin'
 import ClientRegister from './pages/ClientRegister'
 import BusinessRegister from './pages/BusinessRegister'
 import Barbers from './pages/Barbers'
+import BusinessDashboard from './pages/BusinessDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
 
@@ -19,6 +20,7 @@ function BarberQApp() {
         <Route path="/register/client" element={<ClientRegister />} />
         <Route path="/register/business" element={<BusinessRegister />} />
         <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
+        <Route path="/dashboard/business" element={<ProtectedRoute><BusinessDashboard /></ProtectedRoute>} />
       </Routes>
     </div>
     </AuthProvider>

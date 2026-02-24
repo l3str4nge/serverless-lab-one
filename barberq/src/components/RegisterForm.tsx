@@ -35,16 +35,16 @@ function RegisterForm({ type }: RegisterFormProps) {
     setLoading(true)
 
     try {
-      if (!isClient) {
-        setError('Business registration is not available yet.')
-        return
-      }
+      const url = isClient ? '/api/auth/register' : '/api/auth/business/register'
+      const body = isClient
+        ? { email, password, name: clientFields.name }
+        : { email, password, businessName: businessFields.businessName, ownerName: businessFields.ownerName }
 
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password, name: clientFields.name }),
+        body: JSON.stringify(body),
       })
 
       console.log('Status:', res.status)
