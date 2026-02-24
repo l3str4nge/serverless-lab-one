@@ -1,3 +1,6 @@
+# Lambda build artifacts
+**/*.zip
+
 # Terraform
 **/.terraform
 **/.terraform.lock.hcl

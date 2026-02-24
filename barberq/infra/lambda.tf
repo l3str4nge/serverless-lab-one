@@ -1,0 +1,60 @@
+# IAM role for auth Lambdas
+resource "aws_iam_role" "lambda_auth" {
+  name = "barberq-lambda-auth-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+# Allow Lambda to write logs
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.lambda_auth.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Allow Lambda to call Cognito
+resource "aws_iam_role_policy" "lambda_cognito" {
+  name = "barberq-lambda-cognito-policy"
+  role = aws_iam_role.lambda_auth.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = ["cognito-idp:SignUp"]
+      Resource = [
+        aws_cognito_user_pool.clients.arn,
+      ]
+    }]
+  })
+}
+
+# --- Client registration Lambda ---
+
+data "archive_file" "register_client" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/auth/register_client.py"
+  output_path = "${path.module}/../lambdas/auth/register_client.zip"
+}
+
+resource "aws_lambda_function" "register_client" {
+  function_name    = "barberq-register-client"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "register_client.handler"
+  filename         = data.archive_file.register_client.output_path
+  source_code_hash = data.archive_file.register_client.output_base64sha256
+
+  environment {
+    variables = {
+      APP_CLIENT_ID = aws_cognito_user_pool_client.clients_app.id
+    }
+  }
+}
+

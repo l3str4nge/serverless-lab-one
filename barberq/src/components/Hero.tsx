@@ -14,13 +14,13 @@ function Hero() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="/register/client"
+            href="/barberq/register/client"
             className="bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-8 py-4 rounded-xl text-lg transition-colors"
           >
             Book a barber
           </a>
           <a
-            href="/register/business"
+            href="/barberq/register/business"
             className="border border-zinc-700 hover:border-[#c9a84c] text-zinc-300 hover:text-[#c9a84c] font-bold px-8 py-4 rounded-xl text-lg transition-colors"
           >
             I'm a barber →
