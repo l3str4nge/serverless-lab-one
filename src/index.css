@@ -1,2 +1,8 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-gold: #c9a84c;
+  --color-gold-light: #e2c070;
+  --color-gold-dark: #a07830;
+}

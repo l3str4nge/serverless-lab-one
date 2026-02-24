@@ -7,6 +7,13 @@ const projects = [
     url: 'https://github.com/l3str4nge/serverless-lab-one',
   },
   {
+    name: 'barberq',
+    description:
+      'A serverless barbershop booking platform POC built on AWS. Separate registration flows for clients and barbers, powered by AWS Cognito, Lambda, and API Gateway.',
+    tags: ['React', 'TypeScript', 'Python', 'AWS', 'Cognito', 'Lambda', 'API Gateway', 'Terraform'],
+    url: '/barberq',
+  },
+  {
     name: 'kidnoti',
     description:
       'A serverless application that scrapes the daily meal menu from a kindergarten website, extracts and analyzes menu images using AWS Bedrock, and delivers a concise summary via text message — so you always know what\'s on the plate today.',
