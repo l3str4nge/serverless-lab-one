@@ -78,7 +78,7 @@ resource "aws_lambda_function" "login_client" {
   environment {
     variables = {
       APP_CLIENT_ID  = aws_cognito_user_pool_client.clients_app.id
-      ALLOWED_ORIGIN = "https://d2qebwuuo4q2ld.cloudfront.net"
+      ALLOWED_ORIGIN = var.allowed_origin
     }
   }
 }

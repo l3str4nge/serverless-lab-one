@@ -12,3 +12,8 @@ output "register_client_lambda_arn" {
   description = "Client registration Lambda ARN — use when wiring API Gateway manually"
   value       = aws_lambda_function.register_client.arn
 }
+
+output "login_client_lambda_arn" {
+  description = "Client login Lambda ARN — use when wiring API Gateway manually"
+  value       = aws_lambda_function.login_client.arn
+}
