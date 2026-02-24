@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "lambda_cognito" {
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
-      Action = ["cognito-idp:SignUp"]
+      Action = ["cognito-idp:SignUp", "cognito-idp:InitiateAuth"]
       Resource = [
         aws_cognito_user_pool.clients.arn,
       ]
@@ -36,6 +36,7 @@ resource "aws_iam_role_policy" "lambda_cognito" {
 }
 
 # --- Client registration Lambda ---
+
 
 data "archive_file" "register_client" {
   type        = "zip"
@@ -58,3 +59,26 @@ resource "aws_lambda_function" "register_client" {
   }
 }
 
+# --- Client login Lambda ---
+
+data "archive_file" "login_client" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/auth/login_client.py"
+  output_path = "${path.module}/../lambdas/auth/login_client.zip"
+}
+
+resource "aws_lambda_function" "login_client" {
+  function_name    = "barberq-login-client"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "login_client.handler"
+  filename         = data.archive_file.login_client.output_path
+  source_code_hash = data.archive_file.login_client.output_base64sha256
+
+  environment {
+    variables = {
+      APP_CLIENT_ID  = aws_cognito_user_pool_client.clients_app.id
+      ALLOWED_ORIGIN = "https://d2qebwuuo4q2ld.cloudfront.net"
+    }
+  }
+}

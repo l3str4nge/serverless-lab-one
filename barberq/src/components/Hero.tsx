@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function Hero() {
   return (
     <section className="min-h-screen flex items-center justify-center px-6 pt-16">
@@ -13,12 +15,12 @@ function Hero() {
           Book top barbers in your city in seconds. No calls, no waiting — just sharp cuts on your schedule.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/barberq/register/client"
+          <Link
+            to="/barberq/barbers"
             className="bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-8 py-4 rounded-xl text-lg transition-colors"
           >
             Book a barber
-          </a>
+          </Link>
           <a
             href="/barberq/register/business"
             className="border border-zinc-700 hover:border-[#c9a84c] text-zinc-300 hover:text-[#c9a84c] font-bold px-8 py-4 rounded-xl text-lg transition-colors"

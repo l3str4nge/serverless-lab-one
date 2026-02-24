@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 interface LoginFormProps {
   type: 'client' | 'business'
@@ -11,6 +12,8 @@ function LoginForm({ type }: LoginFormProps) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const isClient = type === 'client'
   const label = isClient ? 'client' : 'barber'
@@ -24,10 +27,27 @@ function LoginForm({ type }: LoginFormProps) {
     setLoading(true)
 
     try {
-      // TODO: connect to API Gateway → Lambda → Cognito
-      console.log('Login:', { type, email, password })
-      await new Promise((r) => setTimeout(r, 800)) // placeholder
-      setError('Backend not connected yet.')
+      if (!isClient) {
+        setError('Business login is not available yet.')
+        return
+      }
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.message ?? 'Login failed.')
+        return
+      }
+
+      login(data.accessToken)
+      navigate('/barberq/barbers')
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

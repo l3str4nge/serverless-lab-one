@@ -35,10 +35,29 @@ function RegisterForm({ type }: RegisterFormProps) {
     setLoading(true)
 
     try {
-      // TODO: connect to API Gateway → Lambda → Cognito
-      console.log('Register:', { type, email, password, ...(isClient ? clientFields : businessFields) })
-      await new Promise((r) => setTimeout(r, 800)) // placeholder
-      setError('Backend not connected yet.')
+      if (!isClient) {
+        setError('Business registration is not available yet.')
+        return
+      }
+
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, name: clientFields.name }),
+      })
+
+      console.log('Status:', res.status)
+      const data = await res.json()
+      console.log('Response:', data)
+
+      if (!res.ok) {
+        setError(data.message ?? 'Registration failed.')
+        return
+      }
+
+      setError('') // clear any previous error
+      alert(data.message) // e.g. "Please check your email to verify your account."
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

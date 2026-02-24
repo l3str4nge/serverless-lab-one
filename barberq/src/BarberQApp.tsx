@@ -4,9 +4,13 @@ import ClientLogin from './pages/ClientLogin'
 import BusinessLogin from './pages/BusinessLogin'
 import ClientRegister from './pages/ClientRegister'
 import BusinessRegister from './pages/BusinessRegister'
+import Barbers from './pages/Barbers'
+import ProtectedRoute from './components/ProtectedRoute'
+import { AuthProvider } from './context/AuthContext'
 
 function BarberQApp() {
   return (
+    <AuthProvider>
     <div className="bg-zinc-950 text-white min-h-screen">
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -14,8 +18,10 @@ function BarberQApp() {
         <Route path="/login/business" element={<BusinessLogin />} />
         <Route path="/register/client" element={<ClientRegister />} />
         <Route path="/register/business" element={<BusinessRegister />} />
+        <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
       </Routes>
     </div>
+    </AuthProvider>
   )
 }
 
