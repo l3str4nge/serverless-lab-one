@@ -1,71 +1,72 @@
 # serverless-lab-one
 
-Personal portfolio project — 100% serverless on AWS.
+A monorepo containing a personal portfolio and serverless project experiments on AWS.
 
-## Project Status
+---
 
-**Current phase:** Frontend only — React SPA hosted on S3 + CloudFront.
+## 1. Portfolio (`/src`, `/infra`)
 
-Architecture will grow incrementally. Update this file as new AWS services are added.
+Personal portfolio page — React SPA hosted on S3 + CloudFront, infrastructure managed with Terraform.
 
-## Architecture
+### Architecture
 
 ```
 Browser → CloudFront (CDN) → S3 (static hosting)
 ```
 
-| Layer      | Service                  | Notes                                  |
-|------------|--------------------------|----------------------------------------|
-| Frontend   | React (Vite)             | SPA, single `index.html` entrypoint    |
-| Hosting    | AWS S3                   | Static website hosting, versioning on  |
-| CDN        | AWS CloudFront           | HTTPS, caching, custom error pages     |
+| Layer    | Service        | Notes                               |
+|----------|----------------|-------------------------------------|
+| Frontend | React (Vite)   | SPA, single `index.html` entrypoint |
+| Hosting  | AWS S3         | Static website hosting              |
+| CDN      | AWS CloudFront | HTTPS, caching, custom error pages  |
+| IaC      | Terraform      | `infra/` directory, profile: kidnoti, region: eu-north-1 |
 
-## Stack
+### Stack
 
-- **Frontend:** React 18, Vite
-- **Language:** TypeScript
-- **Styling:** TBD
-- **IaC:** TBD (likely AWS CDK or Terraform)
+- **Frontend:** React 18, Vite, TypeScript, Tailwind CSS v4
+- **IaC:** Terraform
 - **CI/CD:** TBD
 
-## Project Structure
+### Project Structure
 
 ```
-serverless-lab-one/
-├── src/             # React source code
-├── public/          # Static assets
-├── dist/            # Vite build output — deployed to S3
-├── index.html
-├── vite.config.ts
-├── tsconfig.json
-└── package.json
+src/                  # React source
+  components/         # Hero, About, Projects, Resume, Paintings, Contact
+  context/            # ThemeContext (dark/light mode)
+infra/                # Terraform — S3 + CloudFront
+dist/                 # Build output — deployed to S3
 ```
 
-## Key Conventions
-
-- Build output goes to `dist/` — this is what gets uploaded to S3.
-- CloudFront must be configured with a custom error page: 404 → `/index.html` (status 200) for client-side routing to work.
-- S3 bucket should NOT have public access enabled directly; traffic must go through CloudFront only.
-
-## Common Commands
+### Common Commands
 
 ```bash
-npm run dev      # Local dev server (Vite)
+npm run dev      # Local dev server
 npm run build    # Production build → dist/
 npm run preview  # Preview production build locally
 ```
 
-## Deployment
+### Deployment
 
-Manual steps until CI/CD is set up:
+```bash
+npm run build
+aws s3 sync dist/ s3://serverless-lab-one-portfolio --delete --profile kidnoti
+aws cloudfront create-invalidation --distribution-id <id> --paths "/*" --profile kidnoti
+```
 
-1. `npm run build`
-2. `aws s3 sync dist/ s3://<bucket-name> --delete`
-3. `aws cloudfront create-invalidation --distribution-id <id> --paths "/*"`
+---
 
-## Notes for Claude
+## 2. BarberQ (`/barberq`)
 
-- This project grows incrementally. Do not add AWS services or infrastructure beyond what is listed in the Architecture table above.
+POC for a barbershop booking platform. See `barberq/CLAUDE.md` for full details.
+
+---
+
+## General Notes for Claude
+
+- AWS profile: `kidnoti`, region: `eu-north-1`
+- Terraform binary: `/opt/homebrew/bin/terraform` (arm64)
+- Do not add AWS services beyond what is listed in the Architecture tables above.
+- When adding a new AWS service, update the relevant Architecture table.
+- Do not auto-commit or auto-push — use `/cap` command when asked.
 - Prefer simple, direct solutions. Avoid over-engineering.
-- When adding a new AWS service, update the Architecture table and add a section for it here.
-- Do not auto-commit or auto-push.
+- State files (`terraform.tfstate`) and `.terraform/` directories must never be committed.
