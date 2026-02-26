@@ -10,13 +10,17 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(
+    () => localStorage.getItem('barberq_access_token')
+  )
 
   function login(token: string) {
+    localStorage.setItem('barberq_access_token', token)
     setAccessToken(token)
   }
 
   function logout() {
+    localStorage.removeItem('barberq_access_token')
     setAccessToken(null)
   }
 
