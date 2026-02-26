@@ -42,3 +42,8 @@ output "add_service_lambda_arn" {
   description = "Add service Lambda ARN — use when wiring API Gateway manually"
   value       = aws_lambda_function.add_service.arn
 }
+
+output "list_services_lambda_arn" {
+  description = "List services Lambda ARN — use when wiring API Gateway manually"
+  value       = aws_lambda_function.list_services.arn
+}

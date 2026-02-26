@@ -75,6 +75,30 @@ resource "aws_lambda_function" "add_service" {
   }
 }
 
+# --- List services Lambda ---
+
+data "archive_file" "list_services" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/services/list_services.py"
+  output_path = "${path.module}/../lambdas/services/list_services.zip"
+}
+
+resource "aws_lambda_function" "list_services" {
+  function_name    = "barberq-list-services"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "list_services.handler"
+  filename         = data.archive_file.list_services.output_path
+  source_code_hash = data.archive_file.list_services.output_base64sha256
+
+  environment {
+    variables = {
+      SERVICES_TABLE = aws_dynamodb_table.services.name
+      ALLOWED_ORIGIN = var.allowed_origin
+    }
+  }
+}
+
 # --- Client registration Lambda ---
 
 
