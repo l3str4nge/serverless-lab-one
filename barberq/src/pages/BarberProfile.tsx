@@ -17,10 +17,125 @@ interface Slot {
 
 type Step = 'services' | 'slots' | 'confirm' | 'done'
 
-function formatDate(dateStr: string) {
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+const DAY_HEADERS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+
+function toDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function formatDateLong(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 }
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+
+function Calendar({
+  availableDates,
+  selectedDate,
+  onSelectDate,
+}: {
+  availableDates: Set<string>
+  selectedDate: string | null
+  onSelectDate: (date: string) => void
+}) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const [viewMonth, setViewMonth] = useState(today.getMonth())
+  const [viewYear, setViewYear] = useState(today.getFullYear())
+
+  const firstOfMonth = new Date(viewYear, viewMonth, 1)
+  const lastOfMonth = new Date(viewYear, viewMonth + 1, 0)
+
+  // Monday-first offset
+  const startOffset = (firstOfMonth.getDay() + 6) % 7
+
+  const cells: (Date | null)[] = []
+  for (let i = 0; i < startOffset; i++) cells.push(null)
+  for (let d = 1; d <= lastOfMonth.getDate(); d++) cells.push(new Date(viewYear, viewMonth, d))
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  // Nav bounds: can't go before current month, can't go beyond 3 months ahead
+  const canPrev = viewYear > today.getFullYear() || viewMonth > today.getMonth()
+  const maxMonth = new Date(today.getFullYear(), today.getMonth() + 3, 1)
+  const canNext = new Date(viewYear, viewMonth + 1, 1) < maxMonth
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
+    else setViewMonth(m => m - 1)
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
+    else setViewMonth(m => m + 1)
+  }
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 select-none">
+      {/* Month nav */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={prevMonth}
+          disabled={!canPrev}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >
+          ‹
+        </button>
+        <span className="font-bold text-sm">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+        <button
+          onClick={nextMonth}
+          disabled={!canNext}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Day-of-week headers */}
+      <div className="grid grid-cols-7 mb-1">
+        {DAY_HEADERS.map(h => (
+          <div key={h} className="text-center text-xs text-zinc-600 font-semibold py-1">{h}</div>
+        ))}
+      </div>
+
+      {/* Day grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d, i) => {
+          if (!d) return <div key={i} />
+
+          const dateStr = toDateStr(d)
+          const isPast = d.getTime() <= today.getTime()
+          const isAvailable = !isPast && availableDates.has(dateStr)
+          const isSelected = selectedDate === dateStr
+
+          return (
+            <button
+              key={i}
+              disabled={!isAvailable}
+              onClick={() => onSelectDate(dateStr)}
+              className={[
+                'aspect-square rounded-xl text-sm font-semibold transition-colors',
+                isSelected
+                  ? 'bg-[#c9a84c] text-zinc-950'
+                  : isAvailable
+                  ? 'text-white hover:bg-zinc-800 hover:text-[#c9a84c]'
+                  : 'text-zinc-700 cursor-not-allowed',
+              ].join(' ')}
+            >
+              {d.getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function BarberProfile() {
   const { businessId } = useParams<{ businessId: string }>()
@@ -32,8 +147,9 @@ export default function BarberProfile() {
   const [loadingServices, setLoadingServices] = useState(true)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
 
-  const [slots, setSlots] = useState<Slot[]>([])
+  const [slotsByDate, setSlotsByDate] = useState<Map<string, Slot[]>>(new Map())
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
 
   const [booking, setBooking] = useState(false)
@@ -51,13 +167,23 @@ export default function BarberProfile() {
 
   function handleSelectService(svc: Service) {
     setSelectedService(svc)
-    setSlots([])
+    setSlotsByDate(new Map())
+    setSelectedDate(null)
     setSelectedSlot(null)
     setStep('slots')
     setLoadingSlots(true)
     fetch(`/api/barbers/${businessId}/slots?serviceId=${svc.serviceId}`)
       .then((res) => res.json())
-      .then((data) => setSlots(data.slots ?? []))
+      .then((data) => {
+        const slots: Slot[] = data.slots ?? []
+        const map = new Map<string, Slot[]>()
+        for (const slot of slots) {
+          const existing = map.get(slot.date) ?? []
+          existing.push(slot)
+          map.set(slot.date, existing)
+        }
+        setSlotsByDate(map)
+      })
       .catch(() => {})
       .finally(() => setLoadingSlots(false))
   }
@@ -102,6 +228,9 @@ export default function BarberProfile() {
     }
   }
 
+  const availableDates = new Set(slotsByDate.keys())
+  const timeSlotsForDate = selectedDate ? (slotsByDate.get(selectedDate) ?? []) : []
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
@@ -125,6 +254,7 @@ export default function BarberProfile() {
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-12 space-y-8">
+
         {/* Step 1: Services */}
         <section>
           <h2 className="text-xl font-bold mb-4">
@@ -165,7 +295,7 @@ export default function BarberProfile() {
                   <p className="text-[#c9a84c] font-bold">€{selectedService.price.toFixed(2)}</p>
                   {step !== 'done' && (
                     <button
-                      onClick={() => { setStep('services'); setSelectedService(null); setSelectedSlot(null) }}
+                      onClick={() => { setStep('services'); setSelectedService(null); setSelectedDate(null); setSelectedSlot(null) }}
                       className="text-xs text-zinc-500 hover:text-zinc-300"
                     >
                       Change
@@ -177,38 +307,51 @@ export default function BarberProfile() {
           )}
         </section>
 
-        {/* Step 2: Slots */}
+        {/* Step 2: Calendar + time slots */}
         {(step === 'slots' || step === 'confirm' || step === 'done') && (
           <section>
             <h2 className="text-xl font-bold mb-4">
-              {step === 'slots' ? 'Pick a time' : 'Time slot'}
+              {step === 'slots' ? 'Pick a date & time' : 'Date & time'}
             </h2>
 
             {step === 'slots' ? (
               loadingSlots ? (
-                <p className="text-zinc-500 text-sm">Loading available slots...</p>
-              ) : slots.length === 0 ? (
-                <p className="text-zinc-500 text-sm">No slots available in the next 14 days.</p>
+                <p className="text-zinc-500 text-sm">Loading availability...</p>
+              ) : availableDates.size === 0 ? (
+                <p className="text-zinc-500 text-sm">No availability in the next 3 months.</p>
               ) : (
-                <div className="flex flex-wrap gap-3">
-                  {slots.map((slot, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSelectSlot(slot)}
-                      className="bg-zinc-900 border border-zinc-800 hover:border-[#c9a84c] rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
-                    >
-                      <span className="text-zinc-400">{formatDate(slot.date)}</span>
-                      <span className="mx-2 text-zinc-600">—</span>
-                      <span className="text-white">{slot.startTime}</span>
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  <Calendar
+                    availableDates={availableDates}
+                    selectedDate={selectedDate}
+                    onSelectDate={(d) => { setSelectedDate(d); setSelectedSlot(null) }}
+                  />
+
+                  {selectedDate && (
+                    <div>
+                      <p className="text-sm text-zinc-400 mb-3">
+                        Available times on <span className="text-white font-semibold">{formatDateLong(selectedDate)}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {timeSlotsForDate.map((slot, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSelectSlot(slot)}
+                            className="bg-zinc-900 border border-zinc-800 hover:border-[#c9a84c] hover:text-[#c9a84c] rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
+                          >
+                            {slot.startTime}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             ) : (
               selectedSlot && (
                 <div className="flex items-center justify-between bg-zinc-900 border border-[#c9a84c] rounded-2xl px-6 py-4">
                   <p className="font-semibold">
-                    {formatDate(selectedSlot.date)} — {selectedSlot.startTime}–{selectedSlot.endTime}
+                    {formatDateLong(selectedSlot.date)} — {selectedSlot.startTime}–{selectedSlot.endTime}
                   </p>
                   {step === 'confirm' && (
                     <button
@@ -245,7 +388,9 @@ export default function BarberProfile() {
         {step === 'done' && (
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-8 text-center">
             <p className="text-2xl font-black text-[#c9a84c] mb-2">Booking confirmed!</p>
-            <p className="text-zinc-400 text-sm mb-1">Booking ID: <span className="text-zinc-300 font-mono">{bookingId}</span></p>
+            <p className="text-zinc-400 text-sm mb-1">
+              Booking ID: <span className="text-zinc-300 font-mono">{bookingId}</span>
+            </p>
             <button
               onClick={() => navigate('/barberq/barbers')}
               className="mt-6 text-sm text-zinc-400 hover:text-white transition-colors"

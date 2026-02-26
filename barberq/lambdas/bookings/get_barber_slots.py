@@ -46,11 +46,11 @@ def handler(event, context):
         )
         bookings = bookings_result.get("Items", [])
 
-        # Compute available slots for the next 14 days
+        # Compute available slots for the next 90 days
         today = date.today()
         available = []
 
-        for i in range(1, 15):
+        for i in range(1, 91):
             d = today + timedelta(days=i)
             day_key = d.strftime("%a").upper()[:3]
 
@@ -84,11 +84,6 @@ def handler(event, context):
                     })
 
                 t += duration
-                if len(available) >= 10:
-                    break
-
-            if len(available) >= 10:
-                break
 
         return respond(200, {"slots": available})
 

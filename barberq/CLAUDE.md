@@ -45,7 +45,7 @@ Browser → API Gateway → Lambda → Cognito / DynamoDB
 - [x] AddService page — form wired to POST /api/services
 - [x] Barbers page — lists barbers fetched from GET /api/barbers
 - [x] BarberProfile page — 3-step booking flow (service → slot → confirm)
-- [ ] Token refresh — accessToken lost on page reload (refreshToken cookie exists, no refresh Lambda yet)
+- [x] accessToken persisted in localStorage — survives page reload
 
 ## Auth Flow
 
@@ -54,7 +54,7 @@ Browser → API Gateway → Lambda → Cognito / DynamoDB
 - **Business register:** POST `/api/auth/business/register` → Cognito SignUp (business pool) → verify email
 - **Business login:** POST `/api/auth/business/login` → Cognito (business pool) → same cookie pattern, navigates to `/barberq/dashboard/business`
 - **Protected routes:** `ProtectedRoute` checks `accessToken` in `AuthContext`, redirects to `/barberq/login/client` if absent
-- **Refresh:** not implemented — accessToken lost on page reload
+- **Persistence:** `accessToken` stored in `localStorage` (`barberq_access_token`) — survives page reload
 
 ## Services Flow
 
@@ -172,9 +172,6 @@ barberq/
 | `/barberq/dashboard/business/add-service`        | Add service        | Yes       |
 | `/barberq/dashboard/business/set-availability`   | Set availability   | Yes       |
 
-## Next Steps
-
-1. Token refresh — Lambda reads `refreshToken` cookie, returns new `accessToken`, called on app mount in `AuthContext`
 
 ## Terraform
 
