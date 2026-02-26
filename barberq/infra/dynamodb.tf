@@ -31,3 +31,20 @@ resource "aws_dynamodb_table" "availability" {
     type = "S"
   }
 }
+
+resource "aws_dynamodb_table" "bookings" {
+  name         = "barberq-bookings"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "businessId"
+  range_key    = "bookingId"
+
+  attribute {
+    name = "businessId"
+    type = "S"
+  }
+
+  attribute {
+    name = "bookingId"
+    type = "S"
+  }
+}

@@ -16,6 +16,15 @@ interface DaySchedule {
   isAvailable: boolean
 }
 
+interface Booking {
+  bookingId: string
+  date: string
+  startTime: string
+  endTime: string
+  serviceName: string
+  clientId: string
+}
+
 const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const DAY_LABELS: Record<string, string> = {
   MON: 'Mon', TUE: 'Tue', WED: 'Wed', THU: 'Thu', FRI: 'Fri', SAT: 'Sat', SUN: 'Sun',
@@ -27,6 +36,8 @@ function BusinessDashboard() {
   const [services, setServices] = useState<Service[]>([])
   const [loadingServices, setLoadingServices] = useState(true)
   const [availability, setAvailability] = useState<DaySchedule[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loadingBookings, setLoadingBookings] = useState(true)
 
   useEffect(() => {
     fetch('/api/services', {
@@ -45,6 +56,15 @@ function BusinessDashboard() {
       .then((res) => res.json())
       .then((data) => setAvailability(data.schedule ?? []))
       .catch(() => {})
+
+    fetch('/api/bookings/business', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => setBookings(data.bookings ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingBookings(false))
   }, [accessToken])
 
   return (
@@ -91,6 +111,30 @@ function BusinessDashboard() {
                     <p className="text-zinc-500 text-sm">{s.durationMinutes} min</p>
                   </div>
                   <p className="text-[#c9a84c] font-bold">€{s.price.toFixed(2)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Upcoming bookings section */}
+        <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+          <h2 className="text-xl font-bold mb-6">Upcoming bookings</h2>
+
+          {loadingBookings ? (
+            <p className="text-zinc-500 text-sm">Loading...</p>
+          ) : bookings.length === 0 ? (
+            <p className="text-zinc-500 text-sm">No upcoming bookings.</p>
+          ) : (
+            <ul className="divide-y divide-zinc-800">
+              {bookings.map((b) => (
+                <li key={b.bookingId} className="py-4 grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-zinc-400">{b.date}</p>
+                    <p className="font-semibold">{b.startTime}–{b.endTime}</p>
+                  </div>
+                  <p className="font-semibold self-center">{b.serviceName}</p>
+                  <p className="text-zinc-500 self-center font-mono truncate">{b.clientId.slice(0, 12)}…</p>
                 </li>
               ))}
             </ul>
