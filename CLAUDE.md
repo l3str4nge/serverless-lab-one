@@ -11,14 +11,15 @@ Personal portfolio page — React SPA hosted on S3 + CloudFront, infrastructure 
 ### Architecture
 
 ```
-Browser → CloudFront (CDN) → S3 (static hosting)
+Browser → CloudFront → S3 (static assets)
+                    → API Gateway (BarberQ API, /api/* paths)
 ```
 
 | Layer    | Service        | Notes                               |
 |----------|----------------|-------------------------------------|
 | Frontend | React (Vite)   | SPA, single `index.html` entrypoint |
 | Hosting  | AWS S3         | Static website hosting              |
-| CDN      | AWS CloudFront | HTTPS, caching, custom error pages  |
+| CDN      | AWS CloudFront | HTTPS, caching, custom error pages; `/api/*` proxied to API Gateway via CloudFront Function |
 | IaC      | Terraform      | `infra/` directory, profile: kidnoti, region: eu-north-1 |
 
 ### Stack
@@ -33,7 +34,9 @@ Browser → CloudFront (CDN) → S3 (static hosting)
 src/                  # React source
   components/         # Hero, About, Projects, Resume, Paintings, Contact
   context/            # ThemeContext (dark/light mode)
-infra/                # Terraform — S3 + CloudFront
+infra/                # Terraform — S3 + CloudFront + CloudFront Function
+  variables.tf        # api_gateway_domain variable
+  terraform.tfvars    # Variable values (gitignored)
 dist/                 # Build output — deployed to S3
 ```
 
@@ -48,10 +51,21 @@ npm run preview  # Preview production build locally
 ### Deployment
 
 ```bash
+# 1. Deploy infra changes (if any)
+cd infra && /opt/homebrew/bin/terraform apply
+
+# 2. Build and sync to S3
 npm run build
 aws s3 sync dist/ s3://serverless-lab-one-portfolio --delete --profile kidnoti
-aws cloudfront create-invalidation --distribution-id <id> --paths "/*" --profile kidnoti
+
+# 3. Invalidate CloudFront cache
+aws cloudfront create-invalidation --distribution-id $(cd infra && /opt/homebrew/bin/terraform output -raw cloudfront_distribution_id) --paths "/*" --profile kidnoti
 ```
+
+CloudFront URL: `https://d2qebwuuo4q2ld.cloudfront.net`
+
+**How `/api/*` routing works in production:**
+CloudFront Function (`barberq-api-rewrite`) rewrites `/api/foo` → `/dev/foo` before forwarding to the API Gateway origin. Mirrors the Vite dev proxy exactly — no frontend code changes needed between dev and prod.
 
 ---
 
@@ -69,4 +83,4 @@ POC for a barbershop booking platform. See `barberq/CLAUDE.md` for full details.
 - When adding a new AWS service, update the relevant Architecture table.
 - Do not auto-commit or auto-push — use `/cap` command when asked.
 - Prefer simple, direct solutions. Avoid over-engineering.
-- State files (`terraform.tfstate`) and `.terraform/` directories must never be committed.
+- State files (`terraform.tfstate`), `.terraform/` directories, and `terraform.tfvars` must never be committed.
