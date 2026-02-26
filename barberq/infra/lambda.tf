@@ -36,6 +36,45 @@ resource "aws_iam_role_policy" "lambda_cognito" {
   })
 }
 
+# Allow Lambda to write to DynamoDB
+resource "aws_iam_role_policy" "lambda_dynamodb" {
+  name = "barberq-lambda-dynamodb-policy"
+  role = aws_iam_role.lambda_auth.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["dynamodb:PutItem", "dynamodb:Query"]
+      Resource = [aws_dynamodb_table.services.arn]
+    }]
+  })
+}
+
+# --- Add service Lambda ---
+
+data "archive_file" "add_service" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/services/add_service.py"
+  output_path = "${path.module}/../lambdas/services/add_service.zip"
+}
+
+resource "aws_lambda_function" "add_service" {
+  function_name    = "barberq-add-service"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "add_service.handler"
+  filename         = data.archive_file.add_service.output_path
+  source_code_hash = data.archive_file.add_service.output_base64sha256
+
+  environment {
+    variables = {
+      SERVICES_TABLE = aws_dynamodb_table.services.name
+      ALLOWED_ORIGIN = var.allowed_origin
+    }
+  }
+}
+
 # --- Client registration Lambda ---
 
 

@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 function BusinessDashboard() {
   const { logout } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -29,8 +30,8 @@ function BusinessDashboard() {
           <div className="flex flex-col items-center justify-center py-10 text-center">
             <p className="text-zinc-500 mb-4">No services yet</p>
             <button
-              disabled
-              className="bg-[#c9a84c] disabled:opacity-40 text-zinc-950 font-bold px-5 py-2.5 rounded-lg text-sm"
+              onClick={() => navigate('/barberq/dashboard/business/add-service')}
+              className="bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-5 py-2.5 rounded-lg text-sm transition-colors"
             >
               Add service
             </button>

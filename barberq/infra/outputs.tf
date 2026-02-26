@@ -37,3 +37,8 @@ output "login_business_lambda_arn" {
   description = "Business login Lambda ARN — use when wiring API Gateway manually"
   value       = aws_lambda_function.login_business.arn
 }
+
+output "add_service_lambda_arn" {
+  description = "Add service Lambda ARN — use when wiring API Gateway manually"
+  value       = aws_lambda_function.add_service.arn
+}
