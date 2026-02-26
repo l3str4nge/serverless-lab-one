@@ -47,6 +47,10 @@ def handler(event, context):
         if not svc:
             return respond(404, {"message": "Service not found."})
 
+        # Compute TTL — expire at the appointment's end time
+        end_dt = datetime.strptime(f"{date} {end_time}", "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+        ttl = int(end_dt.timestamp())
+
         booking_id = str(uuid.uuid4())
         bookings_table.put_item(
             Item={
@@ -61,6 +65,7 @@ def handler(event, context):
                 "durationMinutes": int(svc["durationMinutes"]),
                 "status": "confirmed",
                 "createdAt": datetime.now(timezone.utc).isoformat(),
+                "ttl": ttl,
             }
         )
 

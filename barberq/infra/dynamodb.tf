@@ -47,4 +47,9 @@ resource "aws_dynamodb_table" "bookings" {
     name = "bookingId"
     type = "S"
   }
+
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
 }
