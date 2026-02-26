@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function BusinessRegister() {
   const [email, setEmail] = useState('')
@@ -10,6 +11,7 @@ export default function BusinessRegister() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const { t } = useTranslation('barberq')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -23,10 +25,10 @@ export default function BusinessRegister() {
         body: JSON.stringify({ email, password, businessName, ownerName }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.message ?? 'Registration failed.'); return }
+      if (!res.ok) { setError(data.message ?? t('common.somethingWentWrong')); return }
       setDone(true)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -42,24 +44,20 @@ export default function BusinessRegister() {
         </Link>
 
         <div>
-          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#c9a84c] mb-4">Join the platform</p>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#c9a84c] mb-4">{t('businessRegister.badge')}</p>
           <h1 className="text-5xl font-black leading-tight text-white mb-6">
-            Grow your<br />
-            <span className="text-[#c9a84c]">barbershop.</span>
+            {t('businessRegister.title')}<br />
+            <span className="text-[#c9a84c]">{t('businessRegister.titleLine2')}</span>
           </h1>
           <p className="text-zinc-400 text-lg leading-relaxed mb-10">
-            List your services, set your availability, and let clients book you 24/7 — no back-and-forth needed.
+            {t('businessRegister.subtitle')}
           </p>
 
           <ul className="space-y-4">
-            {[
-              'Free to get started',
-              'Full control over your schedule',
-              'Dashboard to track all bookings',
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3">
+            {(['bullet1', 'bullet2', 'bullet3'] as const).map((key) => (
+              <li key={key} className="flex items-start gap-3">
                 <span className="mt-1 w-4 h-4 rounded-full bg-[#c9a84c] flex-shrink-0" />
-                <span className="text-zinc-300">{item}</span>
+                <span className="text-zinc-300">{t(`businessRegister.${key}`)}</span>
               </li>
             ))}
           </ul>
@@ -82,23 +80,23 @@ export default function BusinessRegister() {
               <div className="w-14 h-14 rounded-full bg-[#c9a84c]/10 border border-[#c9a84c] flex items-center justify-center mx-auto mb-6">
                 <span className="text-[#c9a84c] text-2xl">✓</span>
               </div>
-              <h2 className="text-2xl font-black text-white mb-2">Account created!</h2>
-              <p className="text-zinc-400 text-sm mb-6">Check your email to verify your account, then sign in.</p>
+              <h2 className="text-2xl font-black text-white mb-2">{t('businessRegister.successTitle')}</h2>
+              <p className="text-zinc-400 text-sm mb-6">{t('businessRegister.successText')}</p>
               <Link
                 to="/barberq/login/business"
                 className="inline-block bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-6 py-3 rounded-lg transition-colors"
               >
-                Go to sign in
+                {t('businessRegister.goToSignIn')}
               </Link>
             </div>
           ) : (
             <>
-              <h2 className="text-3xl font-black text-white mb-1">Create your account</h2>
-              <p className="text-zinc-400 text-sm mb-8">Set up your BarberQ business profile</p>
+              <h2 className="text-3xl font-black text-white mb-1">{t('businessRegister.formTitle')}</h2>
+              <p className="text-zinc-400 text-sm mb-8">{t('businessRegister.formSubtitle')}</p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Business name</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.businessName')}</label>
                   <input
                     type="text"
                     value={businessName}
@@ -110,7 +108,7 @@ export default function BusinessRegister() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Owner name</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.ownerName')}</label>
                   <input
                     type="text"
                     value={ownerName}
@@ -122,7 +120,7 @@ export default function BusinessRegister() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.email')}</label>
                   <input
                     type="email"
                     value={email}
@@ -134,7 +132,7 @@ export default function BusinessRegister() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Password</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.password')}</label>
                   <input
                     type="password"
                     value={password}
@@ -144,7 +142,7 @@ export default function BusinessRegister() {
                     placeholder="••••••••"
                     className="w-full bg-zinc-900 border border-zinc-700 focus:border-[#c9a84c] text-white rounded-lg px-4 py-3 text-sm outline-none transition-colors placeholder:text-zinc-600"
                   />
-                  <p className="text-zinc-600 text-xs mt-1.5">Min. 8 characters, include uppercase and numbers.</p>
+                  <p className="text-zinc-600 text-xs mt-1.5">{t('register.passwordHint')}</p>
                 </div>
 
                 {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -154,20 +152,20 @@ export default function BusinessRegister() {
                   disabled={loading}
                   className="w-full bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors"
                 >
-                  {loading ? 'Creating account...' : 'Create account'}
+                  {loading ? t('register.creatingAccount') : t('register.createAccount')}
                 </button>
               </form>
 
               <p className="text-zinc-500 text-sm text-center mt-6">
-                Already have an account?{' '}
+                {t('businessRegister.alreadyHaveAccount')}{' '}
                 <Link to="/barberq/login/business" className="text-[#c9a84c] hover:text-[#e2c070] transition-colors">
-                  Sign in
+                  {t('businessRegister.signIn')}
                 </Link>
               </p>
 
               <div className="border-t border-zinc-800 mt-8 pt-6 text-center">
                 <Link to="/barberq/register/client" className="text-zinc-600 hover:text-zinc-400 text-sm transition-colors">
-                  Signing up as a client instead →
+                  {t('businessRegister.switchToClient')}
                 </Link>
               </div>
             </>

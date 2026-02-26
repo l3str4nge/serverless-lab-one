@@ -1,31 +1,32 @@
+import { useTranslation } from 'react-i18next'
+
 const projects = [
   {
     name: 'serverless-lab-one',
-    description:
-      'A personal portfolio and sandbox for learning and experimenting with serverless architecture on AWS. Built with React and hosted on S3 + CloudFront, with infrastructure provisioned using Terraform — this very page is part of the project.',
+    descriptionKey: 'projects.serverlessLabOne',
     tags: ['React', 'TypeScript', 'AWS', 'S3', 'CloudFront', 'Serverless', 'Terraform'],
     url: 'https://github.com/l3str4nge/serverless-lab-one',
   },
   {
     name: 'barberq',
-    description:
-      'A serverless barbershop booking platform POC built on AWS. Separate registration flows for clients and barbers, powered by AWS Cognito, Lambda, and API Gateway.',
+    descriptionKey: 'projects.barberq',
     tags: ['React', 'TypeScript', 'Python', 'AWS', 'Cognito', 'Lambda', 'API Gateway', 'Terraform'],
     url: '/barberq',
   },
   {
     name: 'kidnoti',
-    description:
-      'A serverless application that scrapes the daily meal menu from a kindergarten website, extracts and analyzes menu images using AWS Bedrock, and delivers a concise summary via text message — so you always know what\'s on the plate today.',
+    descriptionKey: 'projects.kidnoti',
     tags: ['Python', 'AWS', 'Serverless', 'Bedrock', 'SNS', 'Web Scraping'],
     url: null,
   },
 ]
 
 function Projects() {
+  const { t } = useTranslation('portfolio')
+
   return (
     <section id="projects" className="max-w-3xl mx-auto px-6 py-24">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12">Projects</h2>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12">{t('projects.title')}</h2>
       <div className="space-y-8">
         {projects.map((project) => (
           <div
@@ -43,15 +44,15 @@ function Projects() {
                   rel="noreferrer"
                   className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap"
                 >
-                  View →
+                  {t('projects.view')}
                 </a>
               ) : (
                 <span className="text-sm text-gray-400 dark:text-gray-600 whitespace-nowrap">
-                  TBD
+                  {t('projects.tbd')}
                 </span>
               )}
             </div>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">{project.description}</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">{t(project.descriptionKey)}</p>
             <div className="flex flex-wrap gap-2">
               {project.tags.map((tag) => (
                 <span

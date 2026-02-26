@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 interface ClientFields {
   name: string
@@ -22,12 +23,11 @@ function RegisterForm({ type }: RegisterFormProps) {
   const [businessFields, setBusinessFields] = useState<BusinessFields>({ businessName: '', ownerName: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { t } = useTranslation('barberq')
 
   const isClient = type === 'client'
-  const label = isClient ? 'client' : 'barber'
   const loginPath = isClient ? '/barberq/login/client' : '/barberq/login/business'
   const switchPath = isClient ? '/barberq/register/business' : '/barberq/register/client'
-  const switchLabel = isClient ? 'Register as a barber' : 'Register as a client'
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -52,14 +52,14 @@ function RegisterForm({ type }: RegisterFormProps) {
       console.log('Response:', data)
 
       if (!res.ok) {
-        setError(data.message ?? 'Registration failed.')
+        setError(data.message ?? t('common.somethingWentWrong'))
         return
       }
 
-      setError('') // clear any previous error
-      alert(data.message) // e.g. "Please check your email to verify your account."
+      setError('')
+      alert(data.message)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -76,14 +76,16 @@ function RegisterForm({ type }: RegisterFormProps) {
 
         {/* Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h1 className="text-2xl font-black text-white mb-1">Create your account</h1>
-          <p className="text-zinc-400 text-sm mb-8">Sign up as a {label}</p>
+          <h1 className="text-2xl font-black text-white mb-1">{t('register.title')}</h1>
+          <p className="text-zinc-400 text-sm mb-8">
+            {t(isClient ? 'register.subtitleClient' : 'register.subtitleBusiness')}
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {isClient ? (
               <div>
-                <label className="block text-sm text-zinc-400 mb-1.5">Full name</label>
+                <label className="block text-sm text-zinc-400 mb-1.5">{t('register.fullName')}</label>
                 <input
                   type="text"
                   value={clientFields.name}
@@ -96,7 +98,7 @@ function RegisterForm({ type }: RegisterFormProps) {
             ) : (
               <>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Business name</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.businessName')}</label>
                   <input
                     type="text"
                     value={businessFields.businessName}
@@ -107,7 +109,7 @@ function RegisterForm({ type }: RegisterFormProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1.5">Owner name</label>
+                  <label className="block text-sm text-zinc-400 mb-1.5">{t('register.ownerName')}</label>
                   <input
                     type="text"
                     value={businessFields.ownerName}
@@ -121,7 +123,7 @@ function RegisterForm({ type }: RegisterFormProps) {
             )}
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('register.email')}</label>
               <input
                 type="email"
                 value={email}
@@ -133,7 +135,7 @@ function RegisterForm({ type }: RegisterFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Password</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('register.password')}</label>
               <input
                 type="password"
                 value={password}
@@ -143,7 +145,7 @@ function RegisterForm({ type }: RegisterFormProps) {
                 minLength={8}
                 className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#c9a84c] text-white rounded-lg px-4 py-3 text-sm outline-none transition-colors placeholder:text-zinc-600"
               />
-              <p className="text-zinc-600 text-xs mt-1.5">Min. 8 characters, include uppercase and numbers.</p>
+              <p className="text-zinc-600 text-xs mt-1.5">{t('register.passwordHint')}</p>
             </div>
 
             {error && (
@@ -155,14 +157,14 @@ function RegisterForm({ type }: RegisterFormProps) {
               disabled={loading}
               className="w-full bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? t('register.creatingAccount') : t('register.createAccount')}
             </button>
           </form>
 
           <p className="text-zinc-500 text-sm text-center mt-6">
-            Already have an account?{' '}
+            {t('register.alreadyHaveAccount')}{' '}
             <Link to={loginPath} className="text-[#c9a84c] hover:text-[#e2c070] transition-colors">
-              Log in
+              {t('register.logIn')}
             </Link>
           </p>
         </div>
@@ -170,7 +172,7 @@ function RegisterForm({ type }: RegisterFormProps) {
         {/* Switch account type */}
         <p className="text-center text-zinc-600 text-sm mt-6">
           <Link to={switchPath} className="hover:text-zinc-400 transition-colors">
-            {switchLabel} →
+            {t(isClient ? 'register.switchToBarber' : 'register.switchToClient')}
           </Link>
         </p>
 

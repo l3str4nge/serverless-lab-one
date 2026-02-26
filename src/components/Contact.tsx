@@ -1,9 +1,13 @@
+import { useTranslation } from 'react-i18next'
+
 function Contact() {
+  const { t } = useTranslation('portfolio')
+
   return (
     <section id="contact" className="max-w-3xl mx-auto px-6 py-24">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Contact</h2>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('contact.title')}</h2>
       <p className="text-gray-500 dark:text-gray-400 text-lg mb-8">
-        Have a project in mind or just want to say hi? Reach out.
+        {t('contact.subtitle')}
       </p>
       <div className="flex flex-col sm:flex-row gap-4">
         <a

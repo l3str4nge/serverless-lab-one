@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 export default function BusinessLogin() {
   const [email, setEmail] = useState('')
@@ -10,6 +11,7 @@ export default function BusinessLogin() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation('barberq')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -23,11 +25,11 @@ export default function BusinessLogin() {
         body: JSON.stringify({ email, password }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.message ?? 'Login failed.'); return }
+      if (!res.ok) { setError(data.message ?? t('common.somethingWentWrong')); return }
       login(data.accessToken)
       navigate('/barberq/dashboard/business')
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -43,24 +45,20 @@ export default function BusinessLogin() {
         </Link>
 
         <div>
-          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#c9a84c] mb-4">For professionals</p>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[#c9a84c] mb-4">{t('businessLogin.forProfessionals')}</p>
           <h1 className="text-5xl font-black leading-tight text-white mb-6">
             BarberQ<br />
-            <span className="text-[#c9a84c]">for Business</span>
+            <span className="text-[#c9a84c]">{t('businessLogin.title')}</span>
           </h1>
           <p className="text-zinc-400 text-lg leading-relaxed mb-10">
-            Run your barbershop smarter. Manage bookings, set your schedule, and grow your clientele — all in one place.
+            {t('businessLogin.subtitle')}
           </p>
 
           <ul className="space-y-4">
-            {[
-              'Take bookings around the clock',
-              'Set your weekly availability in minutes',
-              'See all upcoming appointments at a glance',
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3">
+            {(['bullet1', 'bullet2', 'bullet3'] as const).map((key) => (
+              <li key={key} className="flex items-start gap-3">
                 <span className="mt-1 w-4 h-4 rounded-full bg-[#c9a84c] flex-shrink-0" />
-                <span className="text-zinc-300">{item}</span>
+                <span className="text-zinc-300">{t(`businessLogin.${key}`)}</span>
               </li>
             ))}
           </ul>
@@ -75,15 +73,15 @@ export default function BusinessLogin() {
 
           {/* Mobile logo */}
           <Link to="/barberq" className="lg:hidden block text-center text-xl font-black tracking-widest text-[#c9a84c] uppercase mb-10">
-            BarberQ for Business
+            {t('businessLogin.title')}
           </Link>
 
-          <h2 className="text-3xl font-black text-white mb-1">Welcome back</h2>
-          <p className="text-zinc-400 text-sm mb-8">Sign in to your business account</p>
+          <h2 className="text-3xl font-black text-white mb-1">{t('businessLogin.formTitle')}</h2>
+          <p className="text-zinc-400 text-sm mb-8">{t('businessLogin.formSubtitle')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('login.email')}</label>
               <input
                 type="email"
                 value={email}
@@ -95,7 +93,7 @@ export default function BusinessLogin() {
             </div>
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Password</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('login.password')}</label>
               <input
                 type="password"
                 value={password}
@@ -113,20 +111,20 @@ export default function BusinessLogin() {
               disabled={loading}
               className="w-full bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('businessLogin.signingIn') : t('businessLogin.signIn')}
             </button>
           </form>
 
           <p className="text-zinc-500 text-sm text-center mt-6">
-            No account yet?{' '}
+            {t('businessLogin.noAccount')}{' '}
             <Link to="/barberq/register/business" className="text-[#c9a84c] hover:text-[#e2c070] transition-colors">
-              Create one
+              {t('businessLogin.createOne')}
             </Link>
           </p>
 
           <div className="border-t border-zinc-800 mt-8 pt-6 text-center">
             <Link to="/barberq/login/client" className="text-zinc-600 hover:text-zinc-400 text-sm transition-colors">
-              Booking as a client instead →
+              {t('businessLogin.switchToClient')}
             </Link>
           </div>
         </div>

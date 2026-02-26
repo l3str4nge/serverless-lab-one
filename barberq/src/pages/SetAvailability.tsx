@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 interface DaySchedule {
   day: string
@@ -38,6 +39,7 @@ function SetAvailability() {
   const [schedule, setSchedule] = useState<DaySchedule[]>(DEFAULT_DAYS)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { t } = useTranslation('barberq')
 
   useEffect(() => {
     fetch('/api/availability', {
@@ -85,12 +87,12 @@ function SetAvailability() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.message ?? 'Failed to save availability.')
+        setError(data.message ?? t('common.somethingWentWrong'))
         return
       }
       navigate('/barberq/dashboard/business')
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -107,13 +109,13 @@ function SetAvailability() {
           to="/barberq/dashboard/business"
           className="text-sm text-zinc-400 hover:text-white transition-colors"
         >
-          ← Back to dashboard
+          {t('setAvailability.backToDashboard')}
         </Link>
       </header>
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-black mb-8">Set availability</h1>
+        <h1 className="text-3xl font-black mb-8">{t('setAvailability.title')}</h1>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-4">
           {schedule.map((d, i) => (
@@ -142,7 +144,7 @@ function SetAvailability() {
                   d.isAvailable ? 'text-white' : 'text-zinc-500'
                 }`}
               >
-                {d.label}
+                {t(`setAvailability.days.${d.day}`)}
               </span>
 
               {/* Time selects */}
@@ -157,7 +159,7 @@ function SetAvailability() {
                       <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
-                  <span className="text-zinc-500 text-sm">to</span>
+                  <span className="text-zinc-500 text-sm">{t('setAvailability.to')}</span>
                   <select
                     value={d.endTime}
                     onChange={(e) => updateDay(i, { endTime: e.target.value })}
@@ -169,7 +171,7 @@ function SetAvailability() {
                   </select>
                 </div>
               ) : (
-                <span className="text-zinc-600 text-sm">Closed</span>
+                <span className="text-zinc-600 text-sm">{t('setAvailability.closed')}</span>
               )}
             </div>
           ))}
@@ -183,7 +185,7 @@ function SetAvailability() {
             onClick={() => navigate('/barberq/dashboard/business')}
             className="flex-1 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-bold py-3 rounded-lg transition-colors text-sm"
           >
-            Cancel
+            {t('setAvailability.cancel')}
           </button>
           <button
             type="button"
@@ -191,7 +193,7 @@ function SetAvailability() {
             disabled={loading}
             className="flex-1 bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors text-sm"
           >
-            {loading ? 'Saving...' : 'Save availability'}
+            {loading ? t('setAvailability.saving') : t('setAvailability.save')}
           </button>
         </div>
       </main>

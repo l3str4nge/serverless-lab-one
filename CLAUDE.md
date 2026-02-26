@@ -25,6 +25,7 @@ Browser → CloudFront → S3 (static assets)
 ### Stack
 
 - **Frontend:** React 18, Vite, TypeScript, Tailwind CSS v4
+- **i18n:** react-i18next — English (default) and Polish
 - **IaC:** Terraform
 - **CI/CD:** TBD
 
@@ -32,8 +33,12 @@ Browser → CloudFront → S3 (static assets)
 
 ```
 src/                  # React source
-  components/         # Hero, About, Projects, Resume, Paintings, Contact
+  components/         # Hero, About, Projects, Resume, Paintings, Contact, LanguageToggle, ThemeToggle
   context/            # ThemeContext (dark/light mode)
+  i18n.ts             # i18next config — detects /barberq path, loads per-app default lang
+  locales/
+    en/               # portfolio.json, barberq.json
+    pl/               # portfolio.json, barberq.json
 infra/                # Terraform — S3 + CloudFront + CloudFront Function
   variables.tf        # api_gateway_domain variable
   terraform.tfvars    # Variable values (gitignored)
@@ -84,3 +89,14 @@ POC for a barbershop booking platform. See `barberq/CLAUDE.md` for full details.
 - Do not auto-commit or auto-push — use `/cap` command when asked.
 - Prefer simple, direct solutions. Avoid over-engineering.
 - State files (`terraform.tfstate`), `.terraform/` directories, and `terraform.tfvars` must never be committed.
+
+## i18n
+
+- Library: `react-i18next` + `i18next`
+- Languages: English (`en`), Polish (`pl`)
+- Config: `src/i18n.ts` — imported once in `src/main.tsx`
+- Locale files: `src/locales/{en,pl}/{portfolio,barberq}.json`
+- Default language: **portfolio → `en`**, **BarberQ → `pl`** (detected via `window.location.pathname`)
+- Language preference persisted in `localStorage` using separate keys: `lang_portfolio` and `lang_barberq`
+- Toggle component: `src/components/LanguageToggle.tsx` — `variant="light"` (portfolio, fixed top-right) or `variant="dark"` (BarberQ navbar)
+- All translatable strings must go in the locale JSON files — never hardcode UI text in components

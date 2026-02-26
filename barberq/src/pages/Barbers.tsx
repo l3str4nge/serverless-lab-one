@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 interface Barber {
   businessId: string
@@ -12,6 +13,7 @@ export default function Barbers() {
   const navigate = useNavigate()
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [loading, setLoading] = useState(true)
+  const { t } = useTranslation('barberq')
 
   useEffect(() => {
     fetch('/api/barbers')
@@ -31,19 +33,19 @@ export default function Barbers() {
           onClick={logout}
           className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
         >
-          Log out
+          {t('barbers.logout')}
         </button>
       </div>
 
-      <h1 className="text-3xl font-black text-white mb-2">Available barbers</h1>
-      <p className="text-zinc-400 text-sm mb-10">Book your next appointment</p>
+      <h1 className="text-3xl font-black text-white mb-2">{t('barbers.title')}</h1>
+      <p className="text-zinc-400 text-sm mb-10">{t('barbers.subtitle')}</p>
 
       {loading ? (
-        <p className="text-zinc-500 text-sm">Loading...</p>
+        <p className="text-zinc-500 text-sm">{t('barbers.loading')}</p>
       ) : barbers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border border-zinc-800 rounded-2xl">
-          <p className="text-zinc-500 text-lg font-semibold mb-2">No barbers yet</p>
-          <p className="text-zinc-600 text-sm">Check back soon — barbers are on their way.</p>
+          <p className="text-zinc-500 text-lg font-semibold mb-2">{t('barbers.noBarbers')}</p>
+          <p className="text-zinc-600 text-sm">{t('barbers.noBarbersSub')}</p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -57,7 +59,7 @@ export default function Barbers() {
                 onClick={() => navigate(`/barberq/barbers/${b.businessId}`)}
                 className="bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
               >
-                Book
+                {t('barbers.book')}
               </button>
             </li>
           ))}

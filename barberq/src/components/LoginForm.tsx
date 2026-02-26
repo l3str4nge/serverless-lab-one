@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 interface LoginFormProps {
   type: 'client' | 'business'
@@ -14,12 +15,11 @@ function LoginForm({ type }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation('barberq')
 
   const isClient = type === 'client'
-  const label = isClient ? 'client' : 'barber'
   const registerPath = isClient ? '/barberq/register/client' : '/barberq/register/business'
   const switchPath = isClient ? '/barberq/login/business' : '/barberq/login/client'
-  const switchLabel = isClient ? 'Log in as a barber' : 'Log in as a client'
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -39,14 +39,14 @@ function LoginForm({ type }: LoginFormProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message ?? 'Login failed.')
+        setError(data.message ?? t('common.somethingWentWrong'))
         return
       }
 
       login(data.accessToken)
       navigate(isClient ? '/barberq/barbers' : '/barberq/dashboard/business')
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -63,12 +63,14 @@ function LoginForm({ type }: LoginFormProps) {
 
         {/* Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-          <h1 className="text-2xl font-black text-white mb-1">Welcome back</h1>
-          <p className="text-zinc-400 text-sm mb-8">Log in to your {label} account</p>
+          <h1 className="text-2xl font-black text-white mb-1">{t('login.title')}</h1>
+          <p className="text-zinc-400 text-sm mb-8">
+            {t(isClient ? 'login.subtitleClient' : 'login.subtitleBusiness')}
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('login.email')}</label>
               <input
                 type="email"
                 value={email}
@@ -80,7 +82,7 @@ function LoginForm({ type }: LoginFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Password</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('login.password')}</label>
               <input
                 type="password"
                 value={password}
@@ -100,14 +102,14 @@ function LoginForm({ type }: LoginFormProps) {
               disabled={loading}
               className="w-full bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors"
             >
-              {loading ? 'Logging in...' : 'Log in'}
+              {loading ? t('login.loggingIn') : t('login.logIn')}
             </button>
           </form>
 
           <p className="text-zinc-500 text-sm text-center mt-6">
-            Don't have an account?{' '}
+            {t('login.noAccount')}{' '}
             <Link to={registerPath} className="text-[#c9a84c] hover:text-[#e2c070] transition-colors">
-              Sign up
+              {t('login.signUp')}
             </Link>
           </p>
         </div>
@@ -115,7 +117,7 @@ function LoginForm({ type }: LoginFormProps) {
         {/* Switch account type */}
         <p className="text-center text-zinc-600 text-sm mt-6">
           <Link to={switchPath} className="hover:text-zinc-400 transition-colors">
-            {switchLabel} →
+            {t(isClient ? 'login.switchToBarber' : 'login.switchToClient')}
           </Link>
         </p>
 

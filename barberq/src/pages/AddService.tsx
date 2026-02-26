@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 function AddService() {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ function AddService() {
   const [duration, setDuration] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { t } = useTranslation('barberq')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -31,13 +33,13 @@ function AddService() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message ?? 'Failed to save service.')
+        setError(data.message ?? t('common.somethingWentWrong'))
         return
       }
 
       navigate('/barberq/dashboard/business')
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -51,31 +53,31 @@ function AddService() {
           BarberQ
         </Link>
         <Link to="/barberq/dashboard/business" className="text-sm text-zinc-400 hover:text-white transition-colors">
-          ← Back to dashboard
+          {t('addService.backToDashboard')}
         </Link>
       </header>
 
       {/* Content */}
       <main className="max-w-lg mx-auto px-6 py-12">
-        <h1 className="text-3xl font-black mb-8">Add service</h1>
+        <h1 className="text-3xl font-black mb-8">{t('addService.title')}</h1>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Service name</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('addService.serviceName')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="e.g. Haircut"
+                placeholder={t('addService.placeholder')}
                 className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#c9a84c] text-white rounded-lg px-4 py-3 text-sm outline-none transition-colors placeholder:text-zinc-600"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Price (€)</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('addService.price')}</label>
               <input
                 type="number"
                 value={price}
@@ -89,7 +91,7 @@ function AddService() {
             </div>
 
             <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Duration (minutes)</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">{t('addService.duration')}</label>
               <input
                 type="number"
                 value={duration}
@@ -111,14 +113,14 @@ function AddService() {
                 onClick={() => navigate('/barberq/dashboard/business')}
                 className="flex-1 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-bold py-3 rounded-lg transition-colors text-sm"
               >
-                Cancel
+                {t('addService.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="flex-1 bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold py-3 rounded-lg transition-colors text-sm"
               >
-                {loading ? 'Saving...' : 'Save service'}
+                {loading ? t('addService.saving') : t('addService.save')}
               </button>
             </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 interface Service {
   serviceId: string
@@ -17,19 +18,15 @@ interface Slot {
 
 type Step = 'services' | 'slots' | 'confirm' | 'done'
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
 const DAY_HEADERS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function formatDateLong(dateStr: string) {
+function formatDateLong(dateStr: string, locale: string) {
   const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 // ─── Calendar ────────────────────────────────────────────────────────────────
@@ -43,6 +40,9 @@ function Calendar({
   selectedDate: string | null
   onSelectDate: (date: string) => void
 }) {
+  const { i18n } = useTranslation('barberq')
+  const locale = i18n.language === 'pl' ? 'pl-PL' : 'en-GB'
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -65,6 +65,8 @@ function Calendar({
   const maxMonth = new Date(today.getFullYear(), today.getMonth() + 3, 1)
   const canNext = new Date(viewYear, viewMonth + 1, 1) < maxMonth
 
+  const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
+
   function prevMonth() {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
     else setViewMonth(m => m - 1)
@@ -85,7 +87,7 @@ function Calendar({
         >
           ‹
         </button>
-        <span className="font-bold text-sm">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+        <span className="font-bold text-sm capitalize">{monthLabel}</span>
         <button
           onClick={nextMonth}
           disabled={!canNext}
@@ -141,6 +143,8 @@ export default function BarberProfile() {
   const { businessId } = useParams<{ businessId: string }>()
   const { logout, accessToken } = useAuth()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation('barberq')
+  const locale = i18n.language === 'pl' ? 'pl-PL' : 'en-GB'
 
   const [step, setStep] = useState<Step>('services')
   const [services, setServices] = useState<Service[]>([])
@@ -216,13 +220,13 @@ export default function BarberProfile() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setBookingError(data.message || 'Booking failed.')
+        setBookingError(data.message || t('common.somethingWentWrong'))
         return
       }
       setBookingId(data.bookingId)
       setStep('done')
     } catch {
-      setBookingError('Something went wrong. Please try again.')
+      setBookingError(t('common.somethingWentWrong'))
     } finally {
       setBooking(false)
     }
@@ -242,13 +246,13 @@ export default function BarberProfile() {
             onClick={() => navigate('/barberq/barbers')}
             className="text-sm text-zinc-400 hover:text-white transition-colors"
           >
-            ← Back
+            {t('barberProfile.back')}
           </button>
           <button
             onClick={logout}
             className="text-sm text-zinc-400 hover:text-white transition-colors"
           >
-            Log out
+            {t('barberProfile.logout')}
           </button>
         </div>
       </header>
@@ -258,14 +262,14 @@ export default function BarberProfile() {
         {/* Step 1: Services */}
         <section>
           <h2 className="text-xl font-bold mb-4">
-            {step === 'services' ? 'Choose a service' : 'Service'}
+            {step === 'services' ? t('barberProfile.chooseService') : t('barberProfile.service')}
           </h2>
 
           {step === 'services' ? (
             loadingServices ? (
-              <p className="text-zinc-500 text-sm">Loading services...</p>
+              <p className="text-zinc-500 text-sm">{t('barberProfile.loadingServices')}</p>
             ) : services.length === 0 ? (
-              <p className="text-zinc-500 text-sm">No services available.</p>
+              <p className="text-zinc-500 text-sm">{t('barberProfile.noServices')}</p>
             ) : (
               <ul className="space-y-3">
                 {services.map((svc) => (
@@ -276,7 +280,7 @@ export default function BarberProfile() {
                     >
                       <div>
                         <p className="font-semibold">{svc.name}</p>
-                        <p className="text-zinc-500 text-sm">{svc.durationMinutes} min</p>
+                        <p className="text-zinc-500 text-sm">{svc.durationMinutes} {t('barberProfile.min')}</p>
                       </div>
                       <p className="text-[#c9a84c] font-bold">€{svc.price.toFixed(2)}</p>
                     </button>
@@ -289,7 +293,7 @@ export default function BarberProfile() {
               <div className="flex items-center justify-between bg-zinc-900 border border-[#c9a84c] rounded-2xl px-6 py-4">
                 <div>
                   <p className="font-semibold">{selectedService.name}</p>
-                  <p className="text-zinc-500 text-sm">{selectedService.durationMinutes} min</p>
+                  <p className="text-zinc-500 text-sm">{selectedService.durationMinutes} {t('barberProfile.min')}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <p className="text-[#c9a84c] font-bold">€{selectedService.price.toFixed(2)}</p>
@@ -298,7 +302,7 @@ export default function BarberProfile() {
                       onClick={() => { setStep('services'); setSelectedService(null); setSelectedDate(null); setSelectedSlot(null) }}
                       className="text-xs text-zinc-500 hover:text-zinc-300"
                     >
-                      Change
+                      {t('barberProfile.change')}
                     </button>
                   )}
                 </div>
@@ -311,14 +315,14 @@ export default function BarberProfile() {
         {(step === 'slots' || step === 'confirm' || step === 'done') && (
           <section>
             <h2 className="text-xl font-bold mb-4">
-              {step === 'slots' ? 'Pick a date & time' : 'Date & time'}
+              {step === 'slots' ? t('barberProfile.pickDateTime') : t('barberProfile.dateTime')}
             </h2>
 
             {step === 'slots' ? (
               loadingSlots ? (
-                <p className="text-zinc-500 text-sm">Loading availability...</p>
+                <p className="text-zinc-500 text-sm">{t('barberProfile.loadingSlots')}</p>
               ) : availableDates.size === 0 ? (
-                <p className="text-zinc-500 text-sm">No availability in the next 3 months.</p>
+                <p className="text-zinc-500 text-sm">{t('barberProfile.noSlots')}</p>
               ) : (
                 <div className="space-y-4">
                   <Calendar
@@ -330,7 +334,7 @@ export default function BarberProfile() {
                   {selectedDate && (
                     <div>
                       <p className="text-sm text-zinc-400 mb-3">
-                        Available times on <span className="text-white font-semibold">{formatDateLong(selectedDate)}</span>
+                        {t('barberProfile.availableTimesOn')} <span className="text-white font-semibold">{formatDateLong(selectedDate, locale)}</span>
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {timeSlotsForDate.map((slot, i) => (
@@ -351,14 +355,14 @@ export default function BarberProfile() {
               selectedSlot && (
                 <div className="flex items-center justify-between bg-zinc-900 border border-[#c9a84c] rounded-2xl px-6 py-4">
                   <p className="font-semibold">
-                    {formatDateLong(selectedSlot.date)} — {selectedSlot.startTime}–{selectedSlot.endTime}
+                    {formatDateLong(selectedSlot.date, locale)} — {selectedSlot.startTime}–{selectedSlot.endTime}
                   </p>
                   {step === 'confirm' && (
                     <button
                       onClick={() => { setStep('slots'); setSelectedSlot(null) }}
                       className="text-xs text-zinc-500 hover:text-zinc-300"
                     >
-                      Change
+                      {t('barberProfile.change')}
                     </button>
                   )}
                 </div>
@@ -370,7 +374,7 @@ export default function BarberProfile() {
         {/* Step 3: Confirm */}
         {step === 'confirm' && (
           <section>
-            <h2 className="text-xl font-bold mb-4">Confirm booking</h2>
+            <h2 className="text-xl font-bold mb-4">{t('barberProfile.confirmBooking')}</h2>
             {bookingError && (
               <p className="text-red-400 text-sm mb-4">{bookingError}</p>
             )}
@@ -379,7 +383,7 @@ export default function BarberProfile() {
               disabled={booking}
               className="bg-[#c9a84c] hover:bg-[#e2c070] disabled:opacity-50 text-zinc-950 font-bold px-6 py-3 rounded-xl transition-colors"
             >
-              {booking ? 'Booking...' : 'Confirm booking'}
+              {booking ? t('barberProfile.booking') : t('barberProfile.confirm')}
             </button>
           </section>
         )}
@@ -387,15 +391,15 @@ export default function BarberProfile() {
         {/* Done */}
         {step === 'done' && (
           <section className="bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-8 text-center">
-            <p className="text-2xl font-black text-[#c9a84c] mb-2">Booking confirmed!</p>
+            <p className="text-2xl font-black text-[#c9a84c] mb-2">{t('barberProfile.bookingConfirmed')}</p>
             <p className="text-zinc-400 text-sm mb-1">
-              Booking ID: <span className="text-zinc-300 font-mono">{bookingId}</span>
+              {t('barberProfile.bookingId')} <span className="text-zinc-300 font-mono">{bookingId}</span>
             </p>
             <button
               onClick={() => navigate('/barberq/barbers')}
               className="mt-6 text-sm text-zinc-400 hover:text-white transition-colors"
             >
-              Back to barbers
+              {t('barberProfile.backToBarbers')}
             </button>
           </section>
         )}

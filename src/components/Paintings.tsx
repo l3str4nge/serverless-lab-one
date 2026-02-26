@@ -1,17 +1,21 @@
+import { useTranslation } from 'react-i18next'
+
 const paintings: { title: string; src: string }[] = [
   // Add paintings here, e.g.:
   // { title: 'Sunset', src: '/paintings/sunset.jpg' },
 ]
 
 function Paintings() {
+  const { t } = useTranslation('portfolio')
+
   return (
     <section id="paintings" className="max-w-3xl mx-auto px-6 py-24">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Paintings</h2>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('paintings.title')}</h2>
       <p className="text-gray-500 dark:text-gray-400 text-lg mb-12">
-        A selection of my canvas work.
+        {t('paintings.subtitle')}
       </p>
       {paintings.length === 0 ? (
-        <p className="text-gray-400 dark:text-gray-600 italic">Coming soon.</p>
+        <p className="text-gray-400 dark:text-gray-600 italic">{t('paintings.comingSoon')}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {paintings.map((painting) => (

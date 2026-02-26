@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import ThemeToggle from './components/ThemeToggle'
+import LanguageToggle from './components/LanguageToggle'
 import Hero from './components/Hero'
 import About from './components/About'
 import Resume from './components/Resume'
@@ -13,6 +14,7 @@ function Portfolio() {
   return (
     <ThemeProvider>
       <main className="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+        <LanguageToggle />
         <ThemeToggle />
         <Hero />
         <About />
