@@ -47,3 +47,13 @@ output "list_services_lambda_arn" {
   description = "List services Lambda ARN — use when wiring API Gateway manually"
   value       = aws_lambda_function.list_services.arn
 }
+
+output "get_availability_lambda_arn" {
+  description = "Get availability Lambda ARN — use when wiring API Gateway manually"
+  value       = aws_lambda_function.get_availability.arn
+}
+
+output "set_availability_lambda_arn" {
+  description = "Set availability Lambda ARN — use when wiring API Gateway manually"
+  value       = aws_lambda_function.set_availability.arn
+}

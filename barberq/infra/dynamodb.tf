@@ -14,3 +14,20 @@ resource "aws_dynamodb_table" "services" {
     type = "S"
   }
 }
+
+resource "aws_dynamodb_table" "availability" {
+  name         = "barberq-availability"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "businessId"
+  range_key    = "day"
+
+  attribute {
+    name = "businessId"
+    type = "S"
+  }
+
+  attribute {
+    name = "day"
+    type = "S"
+  }
+}

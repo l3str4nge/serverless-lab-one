@@ -36,7 +36,7 @@ resource "aws_iam_role_policy" "lambda_cognito" {
   })
 }
 
-# Allow Lambda to write to DynamoDB
+# Allow Lambda to read/write DynamoDB tables
 resource "aws_iam_role_policy" "lambda_dynamodb" {
   name = "barberq-lambda-dynamodb-policy"
   role = aws_iam_role.lambda_auth.id
@@ -46,7 +46,10 @@ resource "aws_iam_role_policy" "lambda_dynamodb" {
     Statement = [{
       Effect   = "Allow"
       Action   = ["dynamodb:PutItem", "dynamodb:Query"]
-      Resource = [aws_dynamodb_table.services.arn]
+      Resource = [
+        aws_dynamodb_table.services.arn,
+        aws_dynamodb_table.availability.arn,
+      ]
     }]
   })
 }
@@ -95,6 +98,54 @@ resource "aws_lambda_function" "list_services" {
     variables = {
       SERVICES_TABLE = aws_dynamodb_table.services.name
       ALLOWED_ORIGIN = var.allowed_origin
+    }
+  }
+}
+
+# --- Get availability Lambda ---
+
+data "archive_file" "get_availability" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/availability/get_availability.py"
+  output_path = "${path.module}/../lambdas/availability/get_availability.zip"
+}
+
+resource "aws_lambda_function" "get_availability" {
+  function_name    = "barberq-get-availability"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "get_availability.handler"
+  filename         = data.archive_file.get_availability.output_path
+  source_code_hash = data.archive_file.get_availability.output_base64sha256
+
+  environment {
+    variables = {
+      AVAILABILITY_TABLE = aws_dynamodb_table.availability.name
+      ALLOWED_ORIGIN     = var.allowed_origin
+    }
+  }
+}
+
+# --- Set availability Lambda ---
+
+data "archive_file" "set_availability" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/availability/set_availability.py"
+  output_path = "${path.module}/../lambdas/availability/set_availability.zip"
+}
+
+resource "aws_lambda_function" "set_availability" {
+  function_name    = "barberq-set-availability"
+  role             = aws_iam_role.lambda_auth.arn
+  runtime          = "python3.12"
+  handler          = "set_availability.handler"
+  filename         = data.archive_file.set_availability.output_path
+  source_code_hash = data.archive_file.set_availability.output_base64sha256
+
+  environment {
+    variables = {
+      AVAILABILITY_TABLE = aws_dynamodb_table.availability.name
+      ALLOWED_ORIGIN     = var.allowed_origin
     }
   }
 }
