@@ -10,15 +10,15 @@ function Navbar() {
         <div className="flex items-center gap-3">
           <Link
             to="/barberq/login/client"
-            className="text-sm text-zinc-300 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors"
+            className="text-sm border border-zinc-700 hover:border-zinc-400 text-zinc-300 hover:text-white font-semibold px-4 py-2 rounded-lg transition-colors"
           >
-            Log in
+            Login as client
           </Link>
           <Link
-            to="/barberq/register/client"
-            className="text-sm bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-semibold px-4 py-2 rounded-lg transition-colors"
+            to="/barberq/login/business"
+            className="text-sm bg-[#c9a84c] hover:bg-[#e2c070] text-zinc-950 font-bold px-4 py-2 rounded-lg transition-colors"
           >
-            Get started
+            Login as barber
           </Link>
         </div>
       </div>
